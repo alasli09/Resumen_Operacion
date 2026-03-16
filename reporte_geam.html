@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte Corporativo GEAM</title>
+    <!-- Tailwind CSS para diseño rápido y profesional -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2canvas para la descarga de imagen -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Tipografía Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; }
+        .geam-blue { color: #0a1a3c; }
+        .geam-bg-blue { background-color: #0a1a3c; }
+        .border-geam { border-color: #0a1a3c; }
+        /* Estilos para ocultar el panel de control al imprimir si fuera necesario */
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen py-8 px-4">
+
+    <div class="max-w-5xl mx-auto">
+        
+        <!-- PANEL DE CONTROL (Formulario) -->
+        <div class="no-print bg-white rounded-xl shadow-md p-6 mb-8 border border-slate-200">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold geam-blue flex items-center gap-2">
+                    📊 Gestión de Indicadores GEAM
+                </h2>
+                <button onclick="exportarImagen()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-lg flex items-center gap-2 transition-all shadow-md">
+                    💾 Generar Imagen para compartir
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha del Reporte</label>
+                    <input type="text" id="in-fecha" oninput="updateReport()" value="15 de marzo de 2026" class="w-full p-2.5 bg-slate-50 border rounded-lg text-sm focus:ring-2 focus:ring-blue-900 outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aportes (Día | Promedio)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="in-aportes-dia" oninput="updateReport()" value="88.10" class="w-1/2 p-2.5 bg-slate-50 border rounded-lg text-sm">
+                        <input type="text" id="in-aportes-prom" oninput="updateReport()" value="113.61" class="w-1/2 p-2.5 bg-slate-50 border rounded-lg text-sm">
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Embalse Útil | Var %</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="in-embalse" oninput="updateReport()" value="67.59" class="w-1/2 p-2.5 bg-slate-50 border rounded-lg text-sm">
+                        <input type="text" id="in-variacion" oninput="updateReport()" value="-0.31" class="w-1/2 p-2.5 bg-slate-50 border rounded-lg text-sm">
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Térmica | Ecuador (GWh)</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="in-termica" oninput="updateReport()" value="28.12" class="w-1/2 p-2.5 bg-slate-50 border rounded-lg text-sm">
+                        <input type="text" id="in-ecuador" oninput="updateReport()" value="0.03" class="w-1/2 p-2.5 bg-slate-50 border rounded-lg text-sm">
+                    </div>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-4 italic">* Los cambios se reflejan automáticamente en el reporte de abajo.</p>
+        </div>
+
+        <!-- PLANTILLA DEL REPORTE (Lo que se captura) -->
+        <div id="capture-area" class="bg-white mx-auto max-w-4xl shadow-2xl overflow-hidden border border-slate-200">
+            
+            <!-- Encabezado Corporativo (Azul/Blanco) -->
+            <div class="geam-bg-blue text-white p-12 text-center">
+                <h1 class="text-5xl font-black tracking-tighter uppercase mb-2">Resumen de la operación</h1>
+                <p class="text-xl font-medium tracking-[0.3em] uppercase opacity-80" id="out-fecha">FECHA: 15 DE MARZO DE 2026</p>
+            </div>
+            
+            <!-- Divisor decorativo -->
+            <div class="h-2 geam-bg-blue w-full opacity-60"></div>
+
+            <div class="p-12 pt-16 pb-6">
+                <!-- Grilla de Indicadores -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
+                    
+                    <!-- 1. Aportes -->
+                    <div class="relative">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.5c-4.42 0-8-3.58-8-8 0-4.42 8-11.5 8-11.5s8 7.08 8 11.5c0 4.42-3.58 8-8 8z"/></svg>
+                            </div>
+                            <h2 class="text-lg font-extrabold geam-blue uppercase tracking-tight">Aportes al Sistema</h2>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 border-t-2 border-slate-900 pt-4">
+                            <div>
+                                <p class="text-[32px] font-black text-slate-800 leading-none" id="out-aportes-dia">88.10%</p>
+                                <p class="text-[11px] font-bold text-slate-400 uppercase mt-1">Día</p>
+                            </div>
+                            <div>
+                                <p class="text-[32px] font-black text-slate-800 leading-none" id="out-aportes-prom">113.61%</p>
+                                <p class="text-[11px] font-bold text-slate-400 uppercase mt-1">Promedio*</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Embalse -->
+                    <div class="relative">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M3 11c2 0 3 2 6 2s4-2 6-2 3 2 6 2M3 16c2 0 3 2 6 2s4-2 6-2 3 2 6 2"/></svg>
+                            </div>
+                            <h2 class="text-lg font-extrabold geam-blue uppercase tracking-tight">Embalse útil del Sistema</h2>
+                        </div>
+                        <div class="border-t-2 border-slate-900 pt-4">
+                            <div class="flex items-baseline gap-4">
+                                <span class="text-[32px] font-black text-slate-800 leading-none" id="out-embalse">67.59%</span>
+                                <span class="text-lg font-bold" id="out-variacion-color">
+                                    (<span id="out-variacion">-0.31</span>%**)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Térmica -->
+                    <div class="relative">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M18 10V6L5 10v4h3v8h8v-8h3l-1-4z"/></svg>
+                            </div>
+                            <h2 class="text-lg font-extrabold geam-blue uppercase tracking-tight leading-tight">Generación térmica despachada centralmente</h2>
+                        </div>
+                        <div class="border-t-2 border-slate-900 pt-4">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-[32px] font-black text-slate-800 leading-none" id="out-termica">28.12</span>
+                                <span class="text-lg font-bold text-slate-400 uppercase tracking-widest">GWh</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Intercambios (Globo terráqueo) -->
+                    <div class="relative">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+                            </div>
+                            <div class="flex flex-col">
+                                <h2 class="text-lg font-extrabold geam-blue uppercase tracking-tight">Intercambios con Ecuador</h2>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest -mt-1">Predomina Importación</span>
+                            </div>
+                        </div>
+                        <div class="border-t-2 border-slate-900 pt-4">
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-[32px] font-black text-slate-800 leading-none" id="out-ecuador">0.03</span>
+                                <span class="text-lg font-bold text-slate-400 uppercase tracking-widest">GWh</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pie de Reporte (Espaciado compacto) -->
+                <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-end">
+                    <!-- Notas a la izquierda -->
+                    <div class="space-y-0.5">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">promedio acumulado del mes*</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">diferencial porcentual con respecto al día anterior**</p>
+                        <p class="text-[10px] geam-blue font-black uppercase tracking-widest mt-2">fuente XM</p>
+                    </div>
+
+                    <!-- Logo a la derecha -->
+                    <div class="text-right">
+                        <img src="logo_geam.png" id="main-logo" alt="GEAM LOGO" class="h-20 w-auto ml-auto" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block'">
+                        <div id="logo-fallback" class="hidden">
+                            <span class="text-4xl font-black geam-blue tracking-tighter italic leading-none">GEAM</span>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] -mt-1">Grupo Energético de las Américas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Franja final azul -->
+            <div class="h-6 geam-bg-blue w-full"></div>
+        </div>
+    </div>
+
+    <!-- Lógica JavaScript -->
+    <script>
+        // Función para actualizar los datos en tiempo real
+        function updateReport() {
+            // Obtener valores de los inputs
+            const fecha = document.getElementById('in-fecha').value;
+            const aportesDia = document.getElementById('in-aportes-dia').value;
+            const aportesProm = document.getElementById('in-aportes-prom').value;
+            const embalse = document.getElementById('in-embalse').value;
+            const variacion = document.getElementById('in-variacion').value;
+            const termica = document.getElementById('in-termica').value;
+            const ecuador = document.getElementById('in-ecuador').value;
+
+            // Inyectar en el reporte visual
+            document.getElementById('out-fecha').innerText = `FECHA: ${fecha.toUpperCase()}`;
+            document.getElementById('out-aportes-dia').innerText = `${aportesDia}%`;
+            document.getElementById('out-aportes-prom').innerText = `${aportesProm}%`;
+            document.getElementById('out-embalse').innerText = `${embalse}%`;
+            document.getElementById('out-variacion').innerText = variacion;
+            document.getElementById('out-termica').innerText = termica;
+            document.getElementById('out-ecuador').innerText = ecuador;
+
+            // Cambiar color de la variación (Rojo si es negativo, verde si es positivo)
+            const varColorElement = document.getElementById('out-variacion-color');
+            if (variacion.includes('-')) {
+                varColorElement.className = "text-lg font-bold text-red-600";
+            } else {
+                varColorElement.className = "text-lg font-bold text-emerald-600";
+            }
+        }
+
+        // Función para exportar como imagen
+        function exportarImagen() {
+            const area = document.getElementById('capture-area');
+            
+            // Usamos html2canvas con escala 2 para alta calidad
+            html2canvas(area, {
+                scale: 2,
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Reporte_GEAM_${new Date().toISOString().split('T')[0]}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        // Ejecutar actualización inicial al cargar
+        window.onload = updateReport;
+    </script>
+</body>
+</html>
